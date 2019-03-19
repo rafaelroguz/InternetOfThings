@@ -19,6 +19,6 @@ void loop() {
   //Arduino- Funciona mejor que en la ESP32
   //float temperatura = ((sensorValue * 5.0) / 1024.0) / 0.01;
 
-  Serial.println(temperatura);
+  SerialBT.println(temperatura);
   delay(1000);
 }
