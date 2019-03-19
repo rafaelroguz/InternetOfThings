@@ -5,20 +5,14 @@ BluetoothSerial SerialBT;
 void setup() {
   Serial.begin(9600);
   
-  if (!SerialBT.begin("ESP32-Dan")){ 
+  if (!SerialBT.begin("ESP32-Test")){ 
     Serial.println("An error ocurred initializing Bluetooth");
   }
 }
 
 void loop() {
-  int sensorValue = analogRead(A0);
-  
-  //ESP32 - Funciona pero la temperatura tiene variaciones notables
+  int sensorValue = analogRead(A3);
   float temperatura = ((sensorValue * 3.3) / 2048.0) / 0.01;
-  
-  //Arduino- Funciona mejor que en la ESP32
-  //float temperatura = ((sensorValue * 5.0) / 1024.0) / 0.01;
-
-  Serial.println(temperatura);
+  SerialBT.println(temperatura);
   delay(1000);
 }
