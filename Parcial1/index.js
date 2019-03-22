@@ -1,6 +1,6 @@
 var express = require('express');
 var app = express();
-var server = app.listen(8000, () => { //Start the server, listening on port 4000.
+var server = app.listen(8000, () => { //Start the server, listening on port 8000.
     console.log("Listening to requests on port 8000...");
 })
 
@@ -10,7 +10,7 @@ app.use(express.static('public')); //Send index.html page on GET /
 
 const SerialPort = require('serialport'); 
 const Readline = SerialPort.parsers.Readline;
-const port = new SerialPort('COM3'); //Connect serial port to port COM3. Because my Arduino Board is connected on port COM3. See yours on Arduino IDE -> Tools -> Port
+const port = new SerialPort('COM8'); //Connect serial port to port COM7. IDE -> Tools -> Port. COM7 is for bluetooth
 const parser = port.pipe(new Readline({delimiter: '\r\n'})); //Read the line only when new line comes.
 parser.on('data', (temp) => { //Read data
     console.log(temp);
