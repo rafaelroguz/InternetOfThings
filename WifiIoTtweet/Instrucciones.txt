@@ -1,0 +1,22 @@
+Previo a la implementación del código se tienen que seguir los siguientes pasos:
+
+1.- Crear una cuenta en https://www.iottweet.com/signup/register.php
+
+2.- Prepare su dispositivo IoT e instale las dos bibliotecas, como se muestra a continuación 
+
+	Biblioteca ArduinoJson.h 
+    		- Abre Arduino IDE en tu computadora.
+    		- Ir a Programa > Incluir librería> Administrar bibliotecas
+   		- Buscar "ArduinoJson" en el cuadro de búsqueda, seleccionar versión 5.0.0 e instalar.    	
+		- Reiniciar Arduino IDE
+
+	Biblioteca IoTtweetESP32.h  (Disponible en https://github.com/Isaranu/IoTtweetESP32)
+    		- Descargar el repositorio en tu computadora
+    		- Extraer los archivos
+    		- En la carpeta Arduino > Libraries (En Documents), copiar los dos archivos IoTtweetESP32.h y IoTtweetESP32.cpp.
+    		- Reiniciar Arduino IDE y todo está listo para comenzar.
+
+
+3.- Utilizar el código de ejemplo y cambiar los parámetros correspondientes.
+
+4.- Cargue el programa a la tarjeta, pulsar el botón de Reset y comience a visualizar los datos en su dashboard. Abra el Monitor Serie para ver el estado de la conexión de WiFi de la tarjeta y los datos que se están enviando.
