@@ -1,9 +1,9 @@
 #include <WiFi.h>
 #include <IoTtweetESP32.h>
 
-const char *userid = "";        //IoTtweet account user ID (6 digits, included zero pre-fix)
-const char *key = "";     //IoTtweet registered device key in "MY IOT Garage"
-const char *ssid = "";   //Your-WiFi-router-SSID
+const char *userid = "006385";        //IoTtweet account user ID (6 digits, included zero pre-fix)
+const char *key = "kmf0r6vi2cib";     //IoTtweet registered device key in "MY IOT Garage"
+const char *ssid = "wl-fmat-ccei";   //Your-WiFi-router-SSID
 const char *password = "";    //Your-WiFi-password
 
 float data0, data1, data2, data3;                     //Your sending data variable.
