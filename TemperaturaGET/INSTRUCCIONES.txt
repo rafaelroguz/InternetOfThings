@@ -1,0 +1,9 @@
+Puede consultar la gráfica en el siguiente sitio web:
+
+https://temperaturaesp32.herokuapp.com/index.html
+
+Integrantes del equipo:
+DANIEL BAAS
+VICTOR PERERA
+MARIANA ROCHA
+RAFAEL RODRIGUEZ

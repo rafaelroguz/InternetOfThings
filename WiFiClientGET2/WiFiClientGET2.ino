@@ -4,19 +4,19 @@
     Este archivo envia una petición GET a un sitio web.
 */
 
-#include <ESP8266WiFi.h>
-
-const char *ssid = "wl-fmat-ccei"; //Red WIFI a conentar
-const char *password = "";   //Contraseña de la Red WIFI
+//const char *ssid = "wl-fmat-ccei"; //Red WIFI a conentar
+//const char *password = "";   //Contraseña de la Red WIFI
+const char *ssid = "RODRIGUEZ"; //Red WIFI a conentar
+const char *password = "{IZZI:m5s2n9bz}";   //Contraseña de la Red WIFI
 String host = "iotfirstparcial.herokuapp.com";   //Dirección del servidor
 
 //-----------FUNCIONES--------------------
 float LM35GetTemperatura()
 {
-  int sensorValue = analogRead(A0); //Lectura del ADC
-  float millivolts = (sensorValue / 1023.0) * 3300;
-  float celsius = millivolts / 10;
-  return celsius;
+  int sensorValue = analogRead(A0); 
+  double voltaje = (sensorValue * 3.3) / 2048;
+  double temperatura = voltaje/0.01;  
+  return temperatura;
 }
 //----------------------------------------
 
