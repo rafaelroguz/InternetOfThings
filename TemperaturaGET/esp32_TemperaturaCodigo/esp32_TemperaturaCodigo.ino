@@ -1,10 +1,10 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
  
-//const char* ssid = "wl-fmat-ccei";
-//const char* pass =  "";
-const char* ssid = "RODRIGUEZ";
-const char* pass =  "{IZZI:m5s2n9bz}";
+const char* ssid = "wl-fmat-ccei";
+const char* pass =  "";
+//const char* ssid = "RODRIGUEZ";
+//const char* pass =  "{IZZI:m5s2n9bz}";
 String host = "https://temperaturaesp32.herokuapp.com/UpdateDB.php?temp="; 
 
 float getTemperatura() {

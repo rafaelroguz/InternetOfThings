@@ -12,6 +12,7 @@ const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
 const port = new SerialPort('COM8'); //Connect serial port to port COM7. IDE -> Tools -> Port. COM7 is for bluetooth
 const parser = port.pipe(new Readline({delimiter: '\r\n'})); //Read the line only when new line comes.
+
 parser.on('data', (temp) => { //Read data
     console.log(temp);
     var today = new Date();
