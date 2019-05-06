@@ -3,11 +3,11 @@
 #include "WiFi.h"
 #include <DHT.h>
 
-#define WIFI_SSID "Roguz"
-#define WIFI_PASS "WIFIh4anw8"
+//#define WIFI_SSID "Roguz"
+//#define WIFI_PASS "WIFIh4anw8"
 
-//#define WIFI_SSID "RODRIGUEZ"
-//#define WIFI_PASS "{IZZI:m5s2n9bz}"
+#define WIFI_SSID "RODRIGUEZ"
+#define WIFI_PASS "{IZZI:m5s2n9bz}"
 
 #define MQTT_SERV "io.adafruit.com"
 #define MQTT_PORT 1883
@@ -39,6 +39,9 @@ void setup() {
 
   Serial.println("Conected to WIFI");
 
+  Serial.println("IP address: "); 
+  Serial.println(WiFi.localIP());
+  
   //Subscribe to the ToggleLights topic
   mqtt.subscribe(&request);
 
