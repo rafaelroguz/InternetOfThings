@@ -3,7 +3,7 @@
 #include "Adafruit_MQTT_Client.h"
 
 // Library to work with Wi-Fi
-#include "WiFi.h"
+#include <WiFi.h>
 
 // Library to use the temperatureFeed sensor DHT11
 #include <DHT.h>
@@ -31,9 +31,12 @@ DHT dht(DHTPIN, DHTTYPE);
 // The pin where the lights will be connected
 int pinLights = 13;
 // The pin where the buzzer will be connected
-int pinBuzzer = 16;
+int pinBuzzer = 26;
 // The pin where the Pir Movement sensor will be connected
-int pinPir = 32;
+int pinPir = 33;
+
+float sinVal;
+int toneVal;
 
 WiFiClient client;
 
@@ -89,7 +92,7 @@ void setup() {
 }
 
 void loop() {
-  
+  Serial.println("\n");
   // Connect/Reconnect to MQTT
   MQTT_connect();
     
@@ -97,6 +100,7 @@ void loop() {
   bool isAlarmOn = checkAlarm();
 
   if (isAlarmOn) {
+    Serial.println("Alarma activada!");
     toggleAlarm(isAlarmOn);
     alarmFeed.publish("ON");
   } else {
@@ -151,9 +155,10 @@ void toggleAlarm(bool state) {
   if (state) {
     digitalWrite(pinLights, HIGH);
     digitalWrite(pinBuzzer, HIGH);
-    delay(500);
+    delay(1000);
     digitalWrite(pinLights, LOW);
     digitalWrite(pinBuzzer, LOW);
+    delay(300);
   } else {
     digitalWrite(pinLights, LOW);
     digitalWrite(pinBuzzer, LOW);
@@ -186,7 +191,7 @@ float getTemperature() {
   Serial.print(" *C ");
   Serial.print("Índice de calor: ");
   Serial.print(hic);
-  Serial.print(" *C ");
+  Serial.print(" *C");
 
   return t;
   
