@@ -9,8 +9,6 @@
 #include <DHT.h>
 
 // Wi-Fi data to connecto to the network
-//#define WIFI_SSID "Roguz"
-//#define WIFI_PASS "WIFIh4anw8"
 #define WIFI_SSID "RODRIGUEZ"
 #define WIFI_PASS "{IZZI:m5s2n9bz}"
 
@@ -29,14 +27,15 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 // The pin where the lights will be connected
-int pinLights = 13;
+int pinLights = 23;
+// The pin where the Pir Movement sensor will be connected
+int pinPir = 18;
+// The pin where the LED indicator will be connected
+int pinLed = 13;
 // The pin where the buzzer will be connected
 int pinBuzzer = 26;
-// The pin where the Pir Movement sensor will be connected
-int pinPir = 33;
 
-float sinVal;
-int toneVal;
+bool alarmOn = false;
 
 WiFiClient client;
 
@@ -52,10 +51,18 @@ Adafruit_MQTT_Publish temperatureFeed = Adafruit_MQTT_Publish(&mqtt, MQTT_NAME "
 // Will publish updates to the feed "AlarmON"
 Adafruit_MQTT_Publish alarmFeed = Adafruit_MQTT_Publish(&mqtt, MQTT_NAME "/f/alarmon");
 
-
 void setup() {
-  
   Serial.begin(9600);
+
+  // Declare the Pir pin as input
+  pinMode(pinPir, INPUT);
+  // Declare the lights pin as an output
+  pinMode(pinLights, OUTPUT);
+  // Declare the LED pin as an output
+  pinMode(pinLed, OUTPUT);
+  // Declare the buzze pin as an output
+  pinMode(pinBuzzer, OUTPUT);
+
   Serial.print("\n\nConnecting to Wifi...");
   
   // Try connection with Wi-Fi network
@@ -72,102 +79,63 @@ void setup() {
   // Subscribe to the updates on the "request" feed
   mqtt.subscribe(&requestFeed);
 
-  // Declare the lights pin as an output
-  pinMode(pinLights, OUTPUT);
-  // Make sure the lights are OFF at begining
-  digitalWrite(pinLights, LOW);
-
-  // Declare the buzzer pin as an output
-  pinMode(pinBuzzer, OUTPUT);
-
-  // Make sure the buzzer is OFF at begining
-  digitalWrite(pinBuzzer, LOW);
-
-  // Declare the Pir pir as input
-  pinMode(pinPir, INPUT);
+  // Starts MQTT connection
+  MQTT_connect();
 
   // Beging execution of the DHT11
   dht.begin();
-  
 }
 
-void loop() {
-  Serial.println("\n");
-  // Connect/Reconnect to MQTT
-  MQTT_connect();
-    
-  // Check the state of the alarm
-  bool isAlarmOn = checkAlarm();
-
-  if (isAlarmOn) {
-    Serial.println("Alarma activada!");
-    toggleAlarm(isAlarmOn);
-    alarmFeed.publish("ON");
-  } else {
-    toggleAlarm(isAlarmOn);
-    alarmFeed.publish("OFF");
-    
-    // Reads the temperature from the sensor
-    float temp = getTemperature();
-  
-    // Read from our subscription queue until we run out, or
-    // wait up to 5 seconds for subscription to update
-    Adafruit_MQTT_Subscribe * subscription;
-  
-    // While there are any request on the subscription queue...
-    while ((subscription = mqtt.readSubscription(5000))) {
-      //If we're in here, a subscription updated...
-      if (subscription == &requestFeed) {
-        //Print the new value to the serial monitor
-        Serial.print("Got new request: ");
-        Serial.println((char*) requestFeed.lastread);
-        Serial.println("");
-  
-        // Process the request...
-        if (!strcmp((char*) requestFeed.lastread, "LIGHTS_ON")) {
-          // Turn on the lights
-          digitalWrite(pinLights, HIGH);
-        } else if (!strcmp((char*) requestFeed.lastread, "LIGHTS_OFF")) {
-          // Turn off the lights
-          digitalWrite(pinLights, LOW);
-        } else if (!strcmp((char*) requestFeed.lastread, "TEMPERATURE")) {
-          // Publish the temperature value to the "temperature" feed
-          temperatureFeed.publish(temp);
-        }
-      }
-    }
-  }
-    
-}
-
-// Checks the Pir sensor for movement
-bool checkAlarm() {
-  int value = digitalRead(pinPir);
-
-  if (value == HIGH) 
-    return true;
-  else 
-    return false;
-}
-
-// Toggles the alarm ON/OFF
-void toggleAlarm(bool state) {
-  if (state) {
+void loop() { 
+  if (alarmOn) {
     digitalWrite(pinLights, HIGH);
+    digitalWrite(pinLed, HIGH);
     digitalWrite(pinBuzzer, HIGH);
-    delay(1000);
-    digitalWrite(pinLights, LOW);
-    digitalWrite(pinBuzzer, LOW);
-    delay(300);
-  } else {
-    digitalWrite(pinLights, LOW);
-    digitalWrite(pinBuzzer, LOW);
-  }
+  } 
+  
+  Serial.println("\n");
+
+  // Read from our subscription queue until we run out, or
+  // wait up to 5 seconds for subscription to update
+  Adafruit_MQTT_Subscribe * subscription;
+
+  // While there are any request on the subscription queue...
+  while ((subscription = mqtt.readSubscription(3000))) {
+    //If we're in here, a subscription updated...
+    if (subscription == &requestFeed) {
+      //Print the new value to the serial monitor
+      Serial.print("Got new request: ");
+      Serial.println((char*) requestFeed.lastread);
+      Serial.println("");
+
+      // Process the request...
+      if (!strcmp((char*) requestFeed.lastread, "LIGHTS_ON")) {
+        // Turn on the lights
+        digitalWrite(pinLights, HIGH);
+        digitalWrite(pinLed, HIGH);
+      } else if (!strcmp((char*) requestFeed.lastread, "LIGHTS_OFF")) {
+        // Turn off the lights
+        digitalWrite(pinLights, LOW);
+        digitalWrite(pinLed, LOW);
+      } else if (!strcmp((char*) requestFeed.lastread, "TEMPERATURE")) {
+        // Reads the temperature from the sensor
+        float temp = getTemperature();
+        // Publish the temperature value to the "temperature" feed
+        temperatureFeed.publish(temp);
+      } else if (!strcmp((char*) requestFeed.lastread, "ALARM_ON")) {
+        alarmOn = true;
+      } else if (!strcmp((char*) requestFeed.lastread, "ALARM_OFF")) {
+        alarmOn = false;
+        digitalWrite(pinLights, LOW);
+        digitalWrite(pinLed, LOW);
+        digitalWrite(pinBuzzer, LOW);
+      }
+    }  
+  }  
 }
 
 // Gets the temperature from the DHT11 temperature sensor
 float getTemperature() {
-  
   // Humidity level
   float h = dht.readHumidity();
   // Temperature
@@ -185,21 +153,19 @@ float getTemperature() {
   // Prints the obtained values on the serial monitor
   Serial.print("Humedad: ");
   Serial.print(h);
-  Serial.print(" %\t");
+  Serial.print(" % -- ");
   Serial.print("Temperatura: ");
   Serial.print(t);
-  Serial.print(" *C ");
+  Serial.print(" *C -- ");
   Serial.print("Índice de calor: ");
   Serial.print(hic);
-  Serial.print(" *C");
+  Serial.print(" *C\n\n");
 
   return t;
-  
 }
 
 // Connects to the MQTT server on the adafruit platform
 void MQTT_connect() {
-  
   // If there's already a connection, exit the function
   if (mqtt.connected() && mqtt.ping()) {
     return;
@@ -226,5 +192,4 @@ void MQTT_connect() {
   }
   
   Serial.println("MQTT Connected!");
-  
 }
