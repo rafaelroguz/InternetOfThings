@@ -19,49 +19,57 @@
 #define MQTT_PASS "1cee6e836738402582666a4a98ed154c"
 
 // The pin where the temperatureFeed sensor will be connected
-#define DHTPIN 14
+#define DHTPIN 32
 // Declares the use of the DHT11
 #define DHTTYPE DHT11
 
 // Initialices the use of the DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
-// The pin where the lights will be connected
-int pinLights = 23;
-// The pin where the Pir Movement sensor will be connected
-int pinPir = 18;
-// The pin where the LED indicator will be connected
-int pinLed = 13;
-// The pin where the buzzer will be connected
-int pinBuzzer = 26;
-
-bool alarmOn = false;
-
+// Object to manage Wi-Fi connection
 WiFiClient client;
 
-// Creates a new mqtt object with the previous data
+// Declares MQTT object
 Adafruit_MQTT_Client mqtt(&client, MQTT_SERV, MQTT_PORT, MQTT_NAME, MQTT_PASS);
-
 // Subscribe to the updates on the feed "Request"
 Adafruit_MQTT_Subscribe requestFeed = Adafruit_MQTT_Subscribe(&mqtt, MQTT_NAME "/f/request");
-
 // Will publish updates to the feed "Temperature"
 Adafruit_MQTT_Publish temperatureFeed = Adafruit_MQTT_Publish(&mqtt, MQTT_NAME "/f/temperature");
+// Will publish updates to the feed "alarmOn"
+Adafruit_MQTT_Publish alarmOnFeed = Adafruit_MQTT_Publish(&mqtt, MQTT_NAME "/f/alarmOn");
 
-// Will publish updates to the feed "AlarmON"
-Adafruit_MQTT_Publish alarmFeed = Adafruit_MQTT_Publish(&mqtt, MQTT_NAME "/f/alarmon");
+// The pin where the lights will be connected
+const int pinLights = 23;
+// The pin where the LED indicator will be connected
+const int pinLed = 13;
+// The pin where the buzzer will be connected
+const int pinBuzzer = 14;
+// The pin where the movement sensor will be connected
+const int pinMov = 34;
+// Turn on/off the alarmOn
+bool alarmOn = false;
+
+void IRAM_ATTR ISR() {
+    Serial.println("Alarma activada!");
+
+    if (alarmOn == LOW) {
+      digitalWrite(pinLights, HIGH);
+      digitalWrite(pinLed, HIGH);
+      digitalWrite(pinBuzzer, HIGH);
+      // Connects/reconnects to MQTT
+      //MQTT_connect();
+
+      // Publish the alarmOn event on the adafruit feed "alarmOn"
+      //alarmOnFeed.publish("ON");  
+
+      alarmOn = HIGH;
+      
+      //Serial.println("Sended an alarmOn message!");
+    }
+}
 
 void setup() {
   Serial.begin(9600);
-
-  // Declare the Pir pin as input
-  pinMode(pinPir, INPUT);
-  // Declare the lights pin as an output
-  pinMode(pinLights, OUTPUT);
-  // Declare the LED pin as an output
-  pinMode(pinLed, OUTPUT);
-  // Declare the buzze pin as an output
-  pinMode(pinBuzzer, OUTPUT);
 
   Serial.print("\n\nConnecting to Wifi...");
   
@@ -79,19 +87,26 @@ void setup() {
   // Subscribe to the updates on the "request" feed
   mqtt.subscribe(&requestFeed);
 
-  // Starts MQTT connection
-  MQTT_connect();
+  // Declares the lights pin as an output
+  pinMode(pinLights, OUTPUT);
+  // Declares the LED pin as an output
+  pinMode(pinLed, OUTPUT);
+  // Declares the buzzer pin as an output
+  pinMode(pinBuzzer, OUTPUT);
+  // Declares the pin as input for movement detection
+  pinMode(pinMov, INPUT);
 
   // Beging execution of the DHT11
   dht.begin();
+
+  attachInterrupt(pinMov, ISR, RISING);
 }
 
 void loop() { 
-  if (alarmOn) {
-    digitalWrite(pinLights, HIGH);
-    digitalWrite(pinLed, HIGH);
-    digitalWrite(pinBuzzer, HIGH);
-  } 
+  Serial.print("Alarma: "); Serial.println(alarmOn);
+  
+  //Connects/Reconnects to MQTT
+  MQTT_connect();
   
   Serial.println("\n");
 
@@ -100,7 +115,7 @@ void loop() {
   Adafruit_MQTT_Subscribe * subscription;
 
   // While there are any request on the subscription queue...
-  while ((subscription = mqtt.readSubscription(3000))) {
+  while ((subscription = mqtt.readSubscription(5000))) {
     //If we're in here, a subscription updated...
     if (subscription == &requestFeed) {
       //Print the new value to the serial monitor
@@ -113,7 +128,10 @@ void loop() {
         // Turn on the lights
         digitalWrite(pinLights, HIGH);
         digitalWrite(pinLed, HIGH);
+        digitalWrite(pinBuzzer, LOW);
+        alarmOn = LOW;
       } else if (!strcmp((char*) requestFeed.lastread, "LIGHTS_OFF")) {
+        alarmOn = false;
         // Turn off the lights
         digitalWrite(pinLights, LOW);
         digitalWrite(pinLed, LOW);
@@ -122,8 +140,6 @@ void loop() {
         float temp = getTemperature();
         // Publish the temperature value to the "temperature" feed
         temperatureFeed.publish(temp);
-      } else if (!strcmp((char*) requestFeed.lastread, "ALARM_ON")) {
-        alarmOn = true;
       } else if (!strcmp((char*) requestFeed.lastread, "ALARM_OFF")) {
         alarmOn = false;
         digitalWrite(pinLights, LOW);
