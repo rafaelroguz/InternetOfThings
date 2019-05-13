@@ -2,3 +2,4 @@ ESP32 $243
 DHT11 sensor de temperatura $65
 Resistencias 10k $2
 Sensor Pir movimiento $70
+Relevador 1 canal 5v
