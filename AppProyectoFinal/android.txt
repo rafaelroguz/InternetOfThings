@@ -1,0 +1,3 @@
+title=IoT
+author=Victor
+orientation=landscape
