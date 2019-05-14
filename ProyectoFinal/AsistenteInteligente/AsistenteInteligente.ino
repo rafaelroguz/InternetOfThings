@@ -108,9 +108,9 @@ void setup() {
 
 void loop() { 
   //Connects/Reconnects to MQTT
-  //MQTT_connect();
+  MQTT_connect();
   
-  Serial.print("Alarma: "); Serial.println(alarmOn);
+  Serial.print("Alarm: "); Serial.println(alarmOn);
 
   // Read from our subscription queue until we run out, or
   // wait up to 5 seconds for subscription to update
@@ -133,10 +133,9 @@ void loop() {
 
         // Turning the AC lights will trigger the interruption, so we shut off the lights again
         // and turn off the alarm after 1 seconds
-        delay(500);
+        delay(300);
         alarmOn = false;
-        digitalWrite(pinBuzzer, LOW);
-        
+        digitalWrite(pinBuzzer, LOW);        
       } else if (!strcmp((char*) requestFeed.lastread, "LIGHTS_OFF")) {
         // Turn off the lights
         digitalWrite(pinLights, LOW);
@@ -145,6 +144,8 @@ void loop() {
         // Reads the temperature from the sensor
         float temp = getTemperature();
         // Publish the temperature value to the "temperature" feed
+        temperatureFeed.publish(temp);
+        delay(500);
         temperatureFeed.publish(temp);
       } else if (!strcmp((char*) requestFeed.lastread, "ALARM_OFF")) {
         alarmOn = false;
@@ -158,26 +159,24 @@ void loop() {
         digitalWrite(pinLights, LOW);
         digitalWrite(pinLed, LOW);
         digitalWrite(pinBuzzer, LOW);
-        
+
+        delay(500);
         alarmFeed.publish("OFF"); 
-        delay(1000);
-        alarmFeed.publish("OFF"); 
-        delay(1000);
+        delay(500);
         alarmFeed.publish("OFF"); 
       }
     }  
   }  
 
   if (alarmOn) {
-    if (alerted == false) {
+    //if (alerted == false) {
       Serial.println("Sending alert messages...");
       alerted = true;
       alarmFeed.publish("ON");
       delay(1000);
       alarmFeed.publish("ON");
       delay(1000);
-      alarmFeed.publish("ON");
-    }
+    //}
   }
 }
 
