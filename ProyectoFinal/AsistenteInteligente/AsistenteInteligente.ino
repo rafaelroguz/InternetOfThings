@@ -9,14 +9,14 @@
 #include <DHT.h>
 
 // Wi-Fi data to connecto to the network
-#define WIFI_SSID "RODRIGUEZ"
-#define WIFI_PASS "{IZZI:m5s2n9bz}"
+#define WIFI_SSID ""
+#define WIFI_PASS ""
 
 // Data to connect to the adafruit io platform
 #define MQTT_SERV "io.adafruit.com"
 #define MQTT_PORT 1883
-#define MQTT_NAME "rafaelroguz"
-#define MQTT_PASS "1cee6e836738402582666a4a98ed154c"
+#define MQTT_NAME ""
+#define MQTT_PASS ""
 
 // The pin where the temperatureFeed sensor will be connected
 #define DHTPIN 32
